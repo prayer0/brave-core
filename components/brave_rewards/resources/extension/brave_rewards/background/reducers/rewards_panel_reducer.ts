@@ -5,21 +5,7 @@
 import { types } from '../../constants/rewards_panel_types'
 import * as storage from '../storage'
 import { getTabData } from '../api/tabs_api'
-
-function setBadgeText (state: RewardsExtension.State): void {
-  let text = ''
-
-  if (state && state.notifications) {
-    const count = Object.keys(state.notifications).length
-    if (count > 0) {
-      text = count.toString()
-    }
-  }
-
-  chrome.browserAction.setBadgeText({
-    text
-  })
-}
+import { setBadgeText } from '../../utils'
 
 const getWindowId = (id: number) => {
   return `id_${id}`
@@ -102,7 +88,8 @@ export const rewardsPanelReducer = (state: RewardsExtension.State | undefined, a
         }
 
         publishers[id] = {
-          tabUrl: tab.url
+          tabUrl: tab.url,
+          tabId: tab.id
         }
       }
       state = {
@@ -120,6 +107,11 @@ export const rewardsPanelReducer = (state: RewardsExtension.State | undefined, a
         delete publishers[id]
       } else {
         publishers[id] = { ...publishers[id], ...publisher }
+        const newPublisher = publishers[id]
+
+        if (newPublisher.tabId) {
+          setBadgeText(state, newPublisher.verified, newPublisher.tabId)
+        }
       }
 
       state = {
@@ -401,6 +393,25 @@ export const rewardsPanelReducer = (state: RewardsExtension.State | undefined, a
       }
 
       setBadgeText(state)
+      break
+    }
+
+    case types.ON_INIT: {
+      const tab: chrome.tabs.Tab = payload.tab
+
+      if (!tab) {
+        break
+      }
+
+      const id = getWindowId(tab.windowId)
+      const publishers: Record<string, RewardsExtension.Publisher> = state.publishers
+      const publisher = publishers[id]
+
+      if (!publisher || publisher.tabId !== tab.id) {
+        break
+      }
+
+      setBadgeText(state, publisher.verified, publisher.tabId)
       break
     }
   }

@@ -58,3 +58,37 @@ export const getGrant = (grant?: RewardsExtension.GrantInfo) => {
 
   return grant
 }
+
+export const setBadgeText = (state: RewardsExtension.State, verified: boolean = false, tabId: number = -1) => {
+  let text = ''
+
+  if (state && state.notifications && !verified) {
+    const count = Object.keys(state.notifications).length
+    if (count > 0) {
+      text = count.toString()
+    }
+  }
+
+  let data: chrome.browserAction.BadgeTextDetails = {
+    text
+  }
+
+  if (tabId !== -1) {
+    data.tabId = tabId
+    chrome.browserAction.setBadgeBackgroundColor({
+      color: verified ? '#4C54D2' : '#FB542B',
+      tabId
+    })
+
+    if (verified) {
+      data.text = '✓️'
+    }
+
+  } else {
+    chrome.browserAction.setBadgeBackgroundColor({
+      color: '#FB542B'
+    })
+  }
+
+  chrome.browserAction.setBadgeText(data)
+}
