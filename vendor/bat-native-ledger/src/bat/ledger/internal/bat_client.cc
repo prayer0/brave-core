@@ -277,6 +277,7 @@ ledger::WalletInfo BatClient::WalletPropertiesToWalletInfo(
     grant.altcurrency = properties.grants_[i].altcurrency;
     grant.probi = properties.grants_[i].probi;
     grant.expiryTime = properties.grants_[i].expiryTime;
+    grant.type = properties.grants_[i].type;
 
     info.grants_.push_back(grant);
   }
@@ -449,6 +450,8 @@ ledger_->LogResponse(__func__, response_status_code, response, headers);
     ledger_->OnRecoverWallet(ledger::Result::LEDGER_ERROR, 0, empty);
     return;
   }
+
+  // TODO double check here
 
   braveledger_bat_helper::WALLET_INFO_ST wallet_info = ledger_->GetWalletInfo();
   braveledger_bat_helper::WALLET_PROPERTIES_ST properties =
