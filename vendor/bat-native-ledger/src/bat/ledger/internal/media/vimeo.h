@@ -34,8 +34,26 @@ class MediaVimeo : public ledger::LedgerCallbackHandler {
                               const ledger::VisitData& visit_data);
 
  private:
+  static std::string GetVideoUrl(const std::string& video_id);
+
+  static std::string GetMediaKey(const std::string& video_id,
+                                 const std::string& type);
+
+  static std::string GetPublisherKey(const std::string& key);
+
+  void FetchDataFromUrl(
+    const std::string& url,
+    braveledger_media::FetchDataFromUrlCallback callback);
+
+  void OnProcessMedia(
+    const std::string& media_key,
+    ledger::MediaEventInfo event_info,
+    int response_status_code,
+    const std::string& response,
+    const std::map<std::string, std::string>& headers);
 
   bat_ledger::LedgerImpl* ledger_;  // NOT OWNED
+  std::map<std::string, ledger::MediaEventInfo> events;
 
   // For testing purposes
   friend class MediaVimeoTest;
